@@ -5,14 +5,17 @@ import Testing
 @Suite("Profile System Tests")
 struct ProfileSystemTests {
     private static let fileManager = FileManager.default
-    private static let testHome: URL = {
-        let dir = fileManager.temporaryDirectory.appendingPathComponent("ProfileSystemTests_\(UUID().uuidString)")
-        try? fileManager.createDirectory(at: dir, withIntermediateDirectories: true)
-        setenv("HOME", dir.path, 1)
+    private static let profilesDir: URL = {
+        let root = fileManager.temporaryDirectory.appendingPathComponent("ProfileSystemTests_\(UUID().uuidString)")
+        let profiles = root
+            .appendingPathComponent("Library/Application Support/SlackowWall", isDirectory: true)
+            .appendingPathComponent("Profiles", isDirectory: true)
+        try? fileManager.createDirectory(at: profiles, withIntermediateDirectories: true)
+        setenv("SW_PROFILE_BASE_DIR", profiles.path, 1)
         for key in UserDefaults.standard.dictionaryRepresentation().keys {
             UserDefaults.standard.removeObject(forKey: key)
         }
-        return dir
+        return profiles
     }()
 
     private static var settings: Settings = {
@@ -20,9 +23,7 @@ struct ProfileSystemTests {
     }()
 
     private var baseURL: URL {
-        Self.fileManager.homeDirectoryForCurrentUser
-            .appendingPathComponent("Library/Application Support/SlackowWall", isDirectory: true)
-            .appendingPathComponent("Profiles", isDirectory: true)
+        Self.profilesDir
     }
 
     private func resetEnvironment() {

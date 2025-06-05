@@ -91,7 +91,11 @@ final class Settings: ObservableObject {
     }
 
     private var baseURL: URL {
-        fileManager
+        if let override = ProcessInfo.processInfo.environment["SW_PROFILE_BASE_DIR"] {
+            return URL(fileURLWithPath: override, isDirectory: true)
+        }
+
+        return fileManager
             .homeDirectoryForCurrentUser
             .appendingPathComponent("Library/Application Support/SlackowWall", isDirectory: true)
             .appendingPathComponent("Profiles", isDirectory: true)
